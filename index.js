@@ -28,28 +28,30 @@ const EXTERNAL_PORT = args.listen || args.l || 27016;
 const MONGODB_HOST = args.address || args.a || "127.0.0.1"
 const MONGODB_PORT = args.port || args.p || 27017;
 const LOG_FILE = args.out || args.o || "proxy.log";
+
+//A really hacky logging method.
 var oldLog = console.log;
 console.log = function(data) {
-	fs.appendFile(LOG_FILE, data + "\r\n");
-	oldLog(data)
+	fs.appendFile(LOG_FILE, "[" + new Date().toISOString() + "] " + data + "\r\n");
+	oldLog("[" + new Date().toISOString() + "] " + data)
 }
 
 var server = net.createServer(function (socket) {
+	var clientID = socket.remoteAddress + ":" + socket.remotePort;
+	var tag = "[" + clientID + "] ";
+	console.log(clientID + " connected.")
     socket.on('data', function (msg) {
         //console.log('<< From client to proxy ', msg.toString());
         var serviceSocket = new net.Socket();
-        console.log('======= QUERY =======');
+		console.log(clientID + " -> Server:");
 		parseMessage(msg)
-        console.log('===== END QUERY =====');
         serviceSocket.connect(MONGODB_PORT, MONGODB_HOST, function () {
             serviceSocket.write(msg);
         });
         serviceSocket.on("data", function (data) {
             //console.log('<< From remote to proxy', data.toString());
-			console.log('======= REPLY =======');
+			console.log("Server -> " + clientID + ":");
 			parseMessage(data);
-			console.log('===== END REPLY =====');
-			
             socket.write(data);
             //console.log('>> From proxy to client', data.toString());
         });
@@ -61,6 +63,9 @@ var offset = 0;
 function parseMessage(data) {
 	offset = 0;
 	var header = new MsgHeader(data);
+	//Only opcodes 2004(QUERY) and 1(REPLY) are currently implemented.
+	//Though there are other opcodes, these are not used as frequently.
+	//This should cover a decent amount of data.
 	switch(header.opCode) {
 		case 2004:
 			console.log(new OpQuery(data).toString());
@@ -71,7 +76,6 @@ function parseMessage(data) {
 			console.log("Unimplemented opcode.")
 			break;
 	}
-	console.log("Recieved message with op code " + header.opCode)
 	
 }
 
