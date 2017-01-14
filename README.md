@@ -11,7 +11,7 @@ MongoDB-HoneyProxy was created in response to the ['MongoDB Apocolypse'](https:/
 * Create a MongoDB database. Some good dummy data can be found [here](https://raw.githubusercontent.com/mongodb/docs-assets/primer-dataset/primer-dataset.json).
 * Then, install the project
 ~~~~
-git clone https://github.com/Plazmaz/MongoDB-HoneyProxy.git`
+git clone https://github.com/Plazmaz/MongoDB-HoneyProxy.git
 cd MongoDB-HoneyProxy
 sudo npm install
 ~~~~
