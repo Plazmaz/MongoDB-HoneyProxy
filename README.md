@@ -15,4 +15,4 @@ git clone https://github.com/Plazmaz/MongoDB-HoneyProxy.git
 cd MongoDB-HoneyProxy
 sudo npm install
 ~~~~
-* To run the project, simply use `npm start` or `node index.js`
+* To run the project, simply use `node index.js`
