@@ -58,6 +58,8 @@ var server = net.createServer(function (socket) {
     });
 });
 server.listen(EXTERNAL_PORT);
+console.log("Proxy listening on " + EXTERNAL_PORT + ".");
+
 
 var offset = 0;
 function parseMessage(data) {
