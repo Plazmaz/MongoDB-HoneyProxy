@@ -75,7 +75,8 @@ function parseMessage(data) {
 		case 1:
 			console.log(new OpReply(data).toString());
 		default:
-			console.log("Unimplemented opcode.")
+			console.log("Unimplemented opcode " + header.opCode)
+			console.log("Raw packet data: " + data.toString())
 			break;
 	}
 	
