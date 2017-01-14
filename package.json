@@ -1,0 +1,35 @@
+{
+  "name": "node-mongodb-honeyproxy",
+  "version": "1.0.0",
+  "description": "A honeypot proxy for mongodb",
+  "main": "index.js",
+  "dependencies": {
+    "bson": "^1.0.4",
+    "bson-stream": "^0.0.8",
+    "minimist": "^1.2.0",
+    "ref": "^1.3.3"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Plazmaz/MongoDB-HoneyProxy.git"
+  },
+  "keywords": [
+    "honeypot",
+    "proxy",
+    "mongodb",
+    "security",
+    "infosec",
+    "hacking",
+    "defense"
+  ],
+  "author": "Dylan Katz",
+  "license": "GPL-3.0",
+  "bugs": {
+    "url": "https://github.com/Plazmaz/MongoDB-HoneyProxy/issues"
+  },
+  "homepage": "https://github.com/Plazmaz/MongoDB-HoneyProxy#readme"
+}
