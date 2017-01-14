@@ -4,7 +4,7 @@
 MongoDB-HoneyProxy was created in response to the ['MongoDB Apocolypse'](https://www.bleepingcomputer.com/news/security/mongodb-apocalypse-is-here-as-ransom-attacks-hit-10-000-servers/)
 
 ## Pre-requisites:
-  * `sudo apt-get install nodejs npm gcc`
+  * `sudo apt-get install nodejs npm gcc g++`
   * You'll also need to install MongoDB for this to function, as this project works as a logging proxy.
 
 ## Setup
