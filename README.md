@@ -8,7 +8,7 @@ MongoDB-HoneyProxy was created in response to the ['MongoDB Apocolypse'](https:/
   * You'll also need to install MongoDB for this to function, as this project works as a logging proxy.
 
 ## Setup
-* Create a MongoDB database. Some good dummy data can be found [here](https://raw.githubusercontent.com/mongodb/docs-assets/primer-dataset/primer-dataset.json).
+* Create a MongoDB database. Some good dummy data can be found [here](https://raw.githubusercontent.com/mongodb/docs-assets/primer-dataset/primer-dataset.json). Another good tool is [JSON Generator](http://www.json-generator.com/), which generates fake json that can then be converted to bson.
 * Then, install the project
 ~~~~
 git clone https://github.com/Plazmaz/MongoDB-HoneyProxy.git
