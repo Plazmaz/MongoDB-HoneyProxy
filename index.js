@@ -56,6 +56,9 @@ var server = net.createServer(function (socket) {
             //console.log('>> From proxy to client', data.toString());
         });
     });
+	socket.on('close', function() {
+		console.log(clientID + " disconnected.");
+	});
 });
 server.listen(EXTERNAL_PORT);
 console.log("Proxy listening on " + EXTERNAL_PORT + ".");
