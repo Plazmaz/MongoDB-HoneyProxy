@@ -15,18 +15,18 @@ if(args.h || args.help) {
 	console.log("--address, -a: The ip of the dummy mongodb instance");
 	console.log("			    Default: 127.0.0.1");
 	console.log("--port, -p:    The port of the dummy mongodb instance");
-	console.log("			    Default: 27017");
-	console.log("-l, --listen:  The port to listen on");
 	console.log("			    Default: 27016");
+	console.log("-l, --listen:  The port to listen on");
+	console.log("			    Default: 27017");
 	console.log("-o, --out:     The file to output logs to");
 	console.log("			    Default: proxy.log");
 	console.log("-h, --help:	Displays this message and returns");
 	process.exit()
 }
 
-const EXTERNAL_PORT = args.listen || args.l || 27016;
+const EXTERNAL_PORT = args.listen || args.l || 27017;
 const MONGODB_HOST = args.address || args.a || "127.0.0.1"
-const MONGODB_PORT = args.port || args.p || 27017;
+const MONGODB_PORT = args.port || args.p || 27016;
 const LOG_FILE = args.out || args.o || "proxy.log";
 
 //A really hacky logging method.
