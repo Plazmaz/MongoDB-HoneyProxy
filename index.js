@@ -56,10 +56,19 @@ var server = net.createServer(function (socket) {
 		var packet = parseMessage(msg);
         if(packet != null && packet instanceof OpQuery) {
             console.log(packet.query);
-            if(packet.query && packet.query.length > 0 && (packet.query[0].client || packet.query[0].whatsmyuri)) {
+			var fingerprint = "";
+			if(packet.query && packet.query.length > 0 && packet.query[0].client) {
+				fingerprint = packet.query[0].client;
+			}
+            if(packet.query && packet.query.length > 0) {
                 console.log("Sensor = " + sensor)
                 if(sensor) {
-                    sensor.addAttacker(socket.remoteAddress, JSON.stringify(packet.query[0]))
+					if(fingerprint) {
+						sensor.addAttacker(socket.remoteAddress, JSON.stringify(fingerprint));
+					} else {
+						sensor.addAttacker(socket.remoteAddress, socket.remoteAddress);						
+					}
+					sensor.logCommand(socket.remoteAddress, "login", JSON.stringify(packet.query[0]))
                 }
             } else {
                 console.log("Logging packet...")
