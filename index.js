@@ -1,9 +1,12 @@
-var net = require('net');
-var ref = require('ref')
-var fs = require('fs');
-var BSON = require('bson');
-var parseArgs = require('minimist')
+const net = require('net');
+const ref = require('ref')
+const fs = require('fs');
+const BSON = require('bson');
+const parseArgs = require('minimist');
+const Sensor = require('honeymesh');
 var bson = new BSON();
+var sensor = false;
+
 var args = parseArgs(process.argv);
 process.on('uncaughtException', function (err) {
   console.log("Client triggered an error.");
@@ -20,6 +23,8 @@ if(args.h || args.help) {
 	console.log("			    Default: 27017");
 	console.log("-o, --out:     The file to output logs to");
 	console.log("			    Default: proxy.log");
+	console.log("--lh, --lhost: The host to log to. Only works for honeymesh servers.");
+	console.log("			    Default: proxy.log");
 	console.log("-h, --help:	Displays this message and returns");
 	process.exit()
 }
@@ -28,6 +33,10 @@ const EXTERNAL_PORT = args.listen || args.l || 27017;
 const MONGODB_HOST = args.address || args.a || "127.0.0.1"
 const MONGODB_PORT = args.port || args.p || 27016;
 const LOG_FILE = args.out || args.o || "proxy.log";
+const LOG_HOST = args.lhost || args.lh || "";
+if(LOG_HOST.length > 0) {
+    sensor = new Sensor(LOG_HOST);
+}
 
 //A really hacky logging method.
 var oldLog = console.log;
@@ -44,7 +53,21 @@ var server = net.createServer(function (socket) {
         //console.log('<< From client to proxy ', msg.toString());
         var serviceSocket = new net.Socket();
 		console.log(clientID + " -> Server:");
-		parseMessage(msg)
+		var packet = parseMessage(msg);
+        if(packet != null && packet instanceof OpQuery) {
+            console.log(packet.query);
+            if(packet.query && packet.query.length > 0 && (packet.query[0].client || packet.query[0].whatsmyuri)) {
+                console.log("Sensor = " + sensor)
+                if(sensor) {
+                    sensor.addAttacker(socket.remoteAddress, JSON.stringify(packet.query[0]))
+                }
+            } else {
+                console.log("Logging packet...")
+                if(sensor) {
+                    sensor.logCommand(socket.remoteAddress, JSON.stringify(packet.query[0]))
+                }
+            }
+        }
         serviceSocket.connect(MONGODB_PORT, MONGODB_HOST, function () {
             serviceSocket.write(msg);
         });
@@ -73,17 +96,19 @@ function parseMessage(data) {
 	//This should cover a decent amount of data.
 	switch(header.opCode) {
 		case 2004:
-			console.log(new OpQuery(data).toString());
-			break;
+            var packet = new OpQuery(data);
+			console.log(packet.toString());
+            return packet;
 		case 1:
-			console.log(new OpReply(data).toString());
-			break;
+			var packet = new OpReply(data);
+            console.log(packet.toString());
+            return packet;
 		default:
 			console.log("Unimplemented opcode " + header.opCode)
 			console.log("Raw packet data: " + data.toString())
-			break;
+            return null;
 	}
-	
+
 }
 
 function OpReply(data) {
@@ -177,7 +202,7 @@ function ObjectId(stream) {
 function readDouble(stream) {
 	var value = stream.readDoubleLE(offset);
 	offset += 8;
-	return value;	
+	return value;
 }
 
 function readByte(stream) {
