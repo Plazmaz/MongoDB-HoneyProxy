@@ -1,7 +1,7 @@
 **DO NOT USE THIS WITH A REAL DATABASE**
 
 ## Intro
-MongoDB-HoneyProxy was created in response to the ['MongoDB Apocolypse'](https://www.bleepingcomputer.com/news/security/mongodb-apocalypse-is-here-as-ransom-attacks-hit-10-000-servers/)
+MongoDB-HoneyProxy was created in response to the ['MongoDB Apocalypse'](https://www.bleepingcomputer.com/news/security/mongodb-apocalypse-is-here-as-ransom-attacks-hit-10-000-servers/)
 
 ## Pre-requisites:
   * `sudo apt-get install nodejs npm gcc g++`
