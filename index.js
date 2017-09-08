@@ -107,12 +107,12 @@ function parseMessage(data, socket) {
 		case 2004:
 			var packet = new OpQuery(data);
 				console.log(packet.toString());
-				sensor.logCommand(socket.remoteAddress, packet.toString().replace(/[^\x00-\x7F]/g, ""),, false)
+				sensor.logCommand(socket.remoteAddress, packet.toString().replace(/[^\x00-\x7F]/g, ""), false)
 			return packet;
 		case 1:
 			var packet = new OpReply(data);
 			console.log(packet.toString());
-			sensor.logCommand(socket.remoteAddress, packet.toString().replace(/[^\x00-\x7F]/g, ""),, false)
+			sensor.logCommand(socket.remoteAddress, packet.toString().replace(/[^\x00-\x7F]/g, ""), false)
 			return packet;
 		default:
 			sensor.logCommand(socket.remoteAddress, "Raw packet (" + header.opCode + "): \n" + data.toString().replace(/[^\x00-\x7F]/g, ""), false)
