@@ -105,16 +105,17 @@ function parseMessage(data) {
 	//This should cover a decent amount of data.
 	switch(header.opCode) {
 		case 2004:
-            var packet = new OpQuery(data);
-			console.log(packet.toString());
-            return packet;
+			var packet = new OpQuery(data);
+				console.log(packet.toString());
+				//sensor.logCommand(socket.remoteAddress, packet.toString(), false)
+			return packet;
 		case 1:
 			var packet = new OpReply(data);
-            console.log(packet.toString());
-	    sensor.logCommand(socket.remoteAddress, packet.toString())
-            return packet;
+			console.log(packet.toString());
+			sensor.logCommand(socket.remoteAddress, packet.toString(), false)
+			return packet;
 		default:
-			sensor.logCommand(socket.remoteAddress, "Unknown command: \n" + new Buffer(data.toString()).toString('base64'))
+			sensor.logCommand(socket.remoteAddress, "Unknown command: \n" + new Buffer(data.toString()).toString('base64'), false)
 			console.log("Unimplemented opcode " + header.opCode)
 			console.log("Raw packet data: " + data.toString())
             return null;
