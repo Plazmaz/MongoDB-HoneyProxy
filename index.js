@@ -115,7 +115,7 @@ function parseMessage(data, socket) {
 			sensor.logCommand(socket.remoteAddress, packet.toString(), false)
 			return packet;
 		default:
-			sensor.logCommand(socket.remoteAddress, "Unknown command: \n" + new Buffer(data.toString()).toString('base64'), false)
+			sensor.logCommand(socket.remoteAddress, "Unknown command: \n" + data.toString().replace(/[^\x00-\x7F]/g, "");, false)
 			console.log("Unimplemented opcode " + header.opCode)
 			console.log("Raw packet data: " + data.toString())
             return null;
