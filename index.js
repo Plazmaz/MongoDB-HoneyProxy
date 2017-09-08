@@ -53,7 +53,7 @@ var server = net.createServer(function (socket) {
         //console.log('<< From client to proxy ', msg.toString());
         var serviceSocket = new net.Socket();
 		console.log(clientID + " -> Server:");
-		var packet = parseMessage(msg);
+		var packet = parseMessage(msg, socket);
         if(packet != null && packet instanceof OpQuery) {
             console.log(packet.query);
 			var fingerprint = "";
@@ -83,7 +83,7 @@ var server = net.createServer(function (socket) {
         serviceSocket.on("data", function (data) {
             //console.log('<< From remote to proxy', data.toString());
 			console.log("Server -> " + clientID + ":");
-			parseMessage(data);
+			parseMessage(data, socket);
             socket.write(data);
             //console.log('>> From proxy to client', data.toString());
         });
@@ -97,7 +97,7 @@ console.log("Proxy listening on " + EXTERNAL_PORT + ".");
 
 
 var offset = 0;
-function parseMessage(data) {
+function parseMessage(data, socket) {
 	offset = 0;
 	var header = new MsgHeader(data);
 	//Only opcodes 2004(QUERY) and 1(REPLY) are currently implemented.
