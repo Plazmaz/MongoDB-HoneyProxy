@@ -32,7 +32,7 @@ docker build --tag="changeme" .
 2) Run a docker image:
 
 ```
-docker run -d -p 80:80 --name="changeme" changeme
+docker run -d -p 27017:27017 --name="changeme" changeme
 ```
 
 If you want to get inside of the container run this:
