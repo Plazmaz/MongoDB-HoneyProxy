@@ -15,7 +15,7 @@ MongoDB-HoneyProxy was created in response to the ['MongoDB Apocalypse'](https:/
 ~~~~
 git clone https://github.com/Plazmaz/MongoDB-HoneyProxy.git
 cd MongoDB-HoneyProxy
-sudo npm install
+npm install
 ~~~~
 * To run the project, simply use `node index.js`
 
