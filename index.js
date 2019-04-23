@@ -3,15 +3,12 @@ const ref = require('ref')
 const fs = require('fs');
 const BSON = require('bson');
 const parseArgs = require('minimist');
-const Sensor = require('honeymesh');
 var bson = new BSON();
-var sensor = false;
-
 var args = parseArgs(process.argv);
-process.on('uncaughtException', function (err) {
+/*process.on('uncaughtException', function (err) {
   console.log("Client triggered an error.");
   console.log(err.message);
-})
+})*/
 
 if(args.h || args.help) {
 	console.log("Help:");
@@ -23,8 +20,6 @@ if(args.h || args.help) {
 	console.log("			    Default: 27017");
 	console.log("-o, --out:     The file to output logs to");
 	console.log("			    Default: proxy.log");
-	console.log("--lh, --lhost: The host to log to. Only works for honeymesh servers.");
-	console.log("			    Default: proxy.log");
 	console.log("-h, --help:	Displays this message and returns");
 	process.exit()
 }
@@ -33,48 +28,43 @@ const EXTERNAL_PORT = args.listen || args.l || 27017;
 const MONGODB_HOST = args.address || args.a || "127.0.0.1"
 const MONGODB_PORT = args.port || args.p || 27016;
 const LOG_FILE = args.out || args.o || "proxy.log";
-const LOG_HOST = args.lhost || args.lh || "";
-if(LOG_HOST.length > 0) {
-    sensor = new Sensor(LOG_HOST);
-}
 
 //A really hacky logging method.
 var oldLog = console.log;
 console.log = function(data) {
-	fs.appendFile(LOG_FILE, "[" + new Date().toISOString() + "] " + data + "\r\n");
+	data = data.toString().replace(/[^\x00-\x7F]/g, "").trim();
+	if(LOG_FILE) {
+	    fs.appendFileSync(LOG_FILE, "[" + new Date().toISOString() + "] " + data + "\r\n");
+	}
 	oldLog("[" + new Date().toISOString() + "] " + data)
 }
 
+function printFromAddress(fromIp, data) {
+	console.log("[" + fromIp + " -> S] " + data);
+}
+function printToAddress(fromIp, data) {
+	console.log("[S -> " + fromIp + "] " + data);
+}
+
 var server = net.createServer(function (socket) {
-	var clientID = socket.remoteAddress + ":" + socket.remotePort;
-	var tag = "[" + clientID + "] ";
-	console.log(clientID + " connected.")
+	var clientId = socket.remoteAddress + ":" + socket.remotePort;
+	var tag = "[" + clientId + "] ";
+	console.log(clientId + " connected.")
     socket.on('data', function (msg) {
         //console.log('<< From client to proxy ', msg.toString());
         var serviceSocket = new net.Socket();
-		console.log(clientID + " -> Server:");
-		var packet = parseMessage(msg, socket);
+		console.log(clientId + " -> Server:");
+		var packet = parseMessage(msg, clientId);
         if(packet != null && packet instanceof OpQuery) {
-            console.log(packet.query);
+            console.log(packet.query.toString());
 			var fingerprint = "";
 			if(packet.query && packet.query.length > 0 && packet.query[0].client) {
 				fingerprint = packet.query[0].client;
 			}
             if(packet.query && packet.query.length > 0) {
-                console.log("Sensor = " + sensor)
-                if(sensor) {
-					if(fingerprint) {
-						sensor.addAttacker(socket.remoteAddress, JSON.stringify(fingerprint));
-					} else {
-						sensor.addAttacker(socket.remoteAddress, socket.remoteAddress);						
-					}
-					sensor.logCommand(socket.remoteAddress, "login", JSON.stringify(packet.query[0]))
-                }
+				printFromAddress(clientId, "login", JSON.stringify(packet.query[0]))
             } else {
-                console.log("Logging packet...")
-                if(sensor) {
-                    sensor.logCommand(socket.remoteAddress, JSON.stringify(packet.query[0]))
-                }
+                printFromAddress(clientId, JSON.stringify(packet.query[0]))
             }
         }
         serviceSocket.connect(MONGODB_PORT, MONGODB_HOST, function () {
@@ -82,14 +72,15 @@ var server = net.createServer(function (socket) {
         });
         serviceSocket.on("data", function (data) {
             //console.log('<< From remote to proxy', data.toString());
-			console.log("Server -> " + clientID + ":");
-			parseMessage(data, socket);
+			//console.log("Server -> " + clientId + ":");
+			parseMessage(data, clientId);
+			printToAddress(clientId, data);
             socket.write(data);
             //console.log('>> From proxy to client', data.toString());
         });
     });
 	socket.on('close', function() {
-		console.log(clientID + " disconnected.");
+		console.log(clientId + " disconnected.");
 	});
 });
 server.listen(EXTERNAL_PORT);
@@ -97,7 +88,7 @@ console.log("Proxy listening on " + EXTERNAL_PORT + ".");
 
 
 var offset = 0;
-function parseMessage(data, socket) {
+function parseMessage(data, identifier) {
 	offset = 0;
 	var header = new MsgHeader(data);
 	//Only opcodes 2004(QUERY) and 1(REPLY) are currently implemented.
@@ -106,18 +97,15 @@ function parseMessage(data, socket) {
 	switch(header.opCode) {
 		case 2004:
 			var packet = new OpQuery(data);
-				console.log(packet.toString());
-				sensor.logCommand(socket.remoteAddress, packet.toString().replace(/[^\x00-\x7F]/g, ""), false)
+			printFromAddress(identifier, packet.toString());
 			return packet;
 		case 1:
 			var packet = new OpReply(data);
-			console.log(packet.toString());
-			sensor.logCommand(socket.remoteAddress, packet.toString().replace(/[^\x00-\x7F]/g, ""), false)
+			printFromAddress(identifier, packet.toString());
 			return packet;
 		default:
-			sensor.logCommand(socket.remoteAddress, "Raw packet (" + header.opCode + "): \n" + data.toString().replace(/[^\x00-\x7F]/g, ""), false)
-			console.log("Unimplemented opcode " + header.opCode)
-			console.log("Raw packet data: " + data.toString())
+			printFromAddress(identifier, "Unimplemented opcode " + header.opCode);
+			printFromAddress(identifier, "Raw packet (" + header.opCode + "): \n" + data.toString())
             return null;
 	}
 
